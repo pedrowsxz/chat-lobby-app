@@ -1,0 +1,27 @@
+# Manual deploy to the VPS over SSH (Actions tab → Deploy → Run workflow).
+# Secrets: DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY (private key), DEPLOY_KNOWN_HOSTS (output of
+# `ssh-keyscan your-host`, so the runner trusts only your server's key). Variable: DEPLOY_PATH (default ~/lobby).
+name: Deploy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Pull and restart on the server
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          TARGET: ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '~/lobby' }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519
+          # DEPLOY_PATH is meant to be expanded here, on the runner; "~" is expanded by the server's shell.
+          # shellcheck disable=SC2029
+          ssh "$TARGET" "cd $DEPLOY_PATH && git pull --ff-only && docker compose -f compose.prod.yaml up -d --build && docker image prune -f"

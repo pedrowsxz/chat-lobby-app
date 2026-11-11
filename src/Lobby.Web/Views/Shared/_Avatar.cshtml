@@ -1,0 +1,15 @@
+@model AvatarViewModel
+<span class="avatar avatar-@Model.Size" style="--hue: @Display.Hue(Model.UserId)" aria-hidden="true">
+    @if (Model.AvatarFileName is not null)
+    {
+        <img src="@Display.AvatarUrl(Model.AvatarFileName)" alt="" loading="lazy" />
+    }
+    else
+    {
+        @Display.Initials(Model.DisplayName)
+    }
+    @if (Model.Online is not null)
+    {
+        <span class="presence-dot" data-presence-user="@Model.UserId" data-online="@(Model.Online.Value ? "true" : "false")"></span>
+    }
+</span>

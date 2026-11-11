@@ -1,0 +1,24 @@
+@model (ConversationListItem Item, bool Active, DateTimeOffset Now)
+@{ var item = Model.Item; }
+<li class="conversation-item @(Model.Active ? "active" : "")" data-conversation-id="@item.Id">
+    <a href="/c/@item.Id" aria-current="@(Model.Active ? "page" : null)">
+        @if (item.Other is not null)
+        {
+            <partial name="_Avatar" model='new AvatarViewModel(item.Other.Id, item.Other.DisplayName, item.Other.AvatarFileName, "md", item.Other.IsDemoBot ? null : item.Online)' />
+        }
+        else
+        {
+            <partial name="_Avatar" model='new AvatarViewModel("group-" + item.Id, item.Title, null, "md")' />
+        }
+        <div class="conversation-text">
+            <div class="conversation-title">
+                <span>@item.Title</span>
+                <span class="conversation-time">@Display.ShortTime(item.LastActivityAt, Model.Now)</span>
+            </div>
+            <div class="conversation-preview">
+                <span class="preview-text">@(item.LastMessagePreview ?? "Nenhuma mensagem ainda")</span>
+                <span class="unread-badge" data-count="@item.UnreadCount" aria-label="@item.UnreadCount não lidas">@item.UnreadCount</span>
+            </div>
+        </div>
+    </a>
+</li>

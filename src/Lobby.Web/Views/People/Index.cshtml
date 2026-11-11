@@ -1,0 +1,54 @@
+@model List<PersonViewModel>
+@inject TimeProvider Time
+@{
+    ViewData["Title"] = "Pessoas";
+    var now = Time.GetUtcNow();
+}
+<div class="page-narrow">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <h1 class="h3 m-0">Pessoas</h1>
+        <form method="get" action="/pessoas" class="d-flex gap-2" role="search">
+            <label for="q" class="visually-hidden">Buscar pessoas</label>
+            <input id="q" name="q" value="@ViewBag.Query" class="form-control form-control-sm" placeholder="Buscar por nome" />
+            <button class="btn btn-sm btn-outline-secondary" type="submit">Buscar</button>
+        </form>
+    </div>
+    @if (Model.Count == 0)
+    {
+        <div class="card"><div class="empty-state p-5">
+            <div class="empty-icon" aria-hidden="true">🔎</div>
+            <p class="mb-0">Ninguém encontrado.</p>
+        </div></div>
+    }
+    else
+    {
+        <div class="card">
+            <ul class="person-list">
+                @foreach (var person in Model)
+                {
+                    <li class="person">
+                        <partial name="_Avatar" model='new AvatarViewModel(person.Id, person.DisplayName, person.AvatarFileName, "md", person.IsDemoBot ? null : person.Online)' />
+                        <div class="flex-grow-1" style="min-width: 0">
+                            <div class="person-name">
+                                @person.DisplayName
+                                @if (person.IsDemoBot) { <span class="badge text-bg-secondary bot-badge">bot</span> }
+                                @if (person.IsGuest) { <span class="badge text-bg-light bot-badge">seu par</span> }
+                            </div>
+                            <div class="person-meta">
+                                @("@" + person.UserName) ·
+                                <span data-presence-text="@(person.IsDemoBot ? null : person.Id)">@(person.IsDemoBot ? "bot" : person.Online ? "online" : Display.LastSeen(person.LastSeenAt, now))</span>
+                            </div>
+                            @if (person.StatusMessage is not null)
+                            {
+                                <div class="person-meta">@person.StatusMessage</div>
+                            }
+                        </div>
+                        <form method="post" action="/pessoas/@person.Id/conversa" asp-antiforgery="true">
+                            <button type="submit" class="btn btn-sm btn-accent">Enviar mensagem</button>
+                        </form>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+</div>

@@ -1,0 +1,19 @@
+@{
+    int code = ViewBag.Code;
+    var (title, text) = code switch
+    {
+        403 => ("Acesso negado", "Você não tem permissão para ver esta página."),
+        404 => ("Página não encontrada", "Ela não existe ou você não tem acesso a ela."),
+        413 => ("Arquivo grande demais", "A foto deve ter no máximo 2 MB."),
+        429 => ("Calma aí", "Muitas tentativas em pouco tempo. Espere um pouco e tente de novo."),
+        _ when code >= 500 => ("Algo deu errado", "Tivemos um problema do nosso lado. Tente de novo em instantes."),
+        _ => ("Não foi possível continuar", "A requisição não pôde ser processada."),
+    };
+    ViewData["Title"] = title;
+}
+<div class="empty-state py-5">
+    <p class="display-4 fw-semibold text-accent mb-2">@code</p>
+    <h1 class="h3">@title</h1>
+    <p class="text-body-secondary">@text</p>
+    <a href="/" class="btn btn-accent mt-2">Voltar ao início</a>
+</div>

@@ -1,0 +1,33 @@
+@model string?
+@{
+    ViewData["Title"] = "Link de par";
+    bool signedIn = ViewBag.AlreadySignedIn;
+}
+<div class="auth-wrap">
+    <section class="auth-card card shadow-sm">
+        <div class="card-body p-4 p-md-5 text-center">
+            @if (signedIn)
+            {
+                <h1 class="h4">Você já está conectado nesta janela</h1>
+                <p class="text-body-secondary">Para conversar com quem te enviou o link, abra-o em uma <strong>janela anônima</strong> ou em outro navegador.</p>
+                <a href="/" class="btn btn-outline-secondary">Voltar às conversas</a>
+            }
+            else if (Model is null)
+            {
+                <h1 class="h4">Este link não vale mais</h1>
+                <p class="text-body-secondary">Links de par funcionam uma única vez e por 30 minutos. Peça um novo para quem te enviou, ou entre sozinho.</p>
+                <form method="post" action="/conta/convidado" asp-antiforgery="true">
+                    <button type="submit" class="btn btn-accent">Entrar como convidado</button>
+                </form>
+            }
+            else
+            {
+                <h1 class="h4">@Model te chamou para conversar</h1>
+                <p class="text-body-secondary">Você vai entrar como visitante, já numa conversa com @Model. Mande uma mensagem e veja chegar na outra janela em tempo real.</p>
+                <form method="post" action="/par/@ViewBag.Token" asp-antiforgery="true">
+                    <button type="submit" class="btn btn-accent btn-lg">Entrar e conversar</button>
+                </form>
+            }
+        </div>
+    </section>
+</div>

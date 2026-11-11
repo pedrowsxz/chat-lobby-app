@@ -1,0 +1,124 @@
+@model ChatPageViewModel
+@inject TimeProvider Time
+@{
+    var header = Model.Header;
+    ViewData["Title"] = header?.Title ?? "Conversas";
+    ViewData["FullHeight"] = true;
+    var now = Time.GetUtcNow();
+    var me = User.GetUserId();
+    var isGroup = header?.Type == ConversationType.Group;
+}
+<div class="chat-shell @(header is not null ? "has-conversation" : "")">
+    <aside class="chat-sidebar" aria-label="Conversas">
+        <div class="chat-sidebar-header">
+            <h1 class="h6 m-0">Conversas</h1>
+            <a class="btn btn-sm btn-outline-secondary" href="/grupos/novo">Novo grupo</a>
+        </div>
+        @if (Model.PairLink is not null)
+        {
+            <partial name="_PairCard" model="Model.PairLink" />
+        }
+        <div id="sidebar" class="d-flex flex-column flex-grow-1" style="min-height: 0">
+            <partial name="_Sidebar" model="new SidebarModel(Model.Conversations, Model.ActiveConversationId, now)" />
+        </div>
+    </aside>
+
+    @if (header is null)
+    {
+        <section class="chat-pane">
+            <div class="empty-state m-auto p-4">
+                <div class="empty-icon" aria-hidden="true">👋</div>
+                <h2 class="h5">Escolha uma conversa</h2>
+                <p>Ou comece uma nova em <a href="/pessoas">Pessoas</a>.</p>
+            </div>
+        </section>
+    }
+    else
+    {
+        var messages = Model.Messages!;
+        <section class="chat-pane @(isGroup ? "conv-group" : "")" id="chat-pane" data-conversation-id="@header.Id"
+                 aria-label="Conversa: @header.Title">
+            <header class="chat-header">
+                <a href="/" class="btn btn-sm btn-link back-button" aria-label="Voltar para conversas">←</a>
+                @if (header.Other is not null)
+                {
+                    <partial name="_Avatar" model='new AvatarViewModel(header.Other.Id, header.Other.DisplayName, header.Other.AvatarFileName, "md", header.Other.IsDemoBot ? null : header.Online)' />
+                }
+                else
+                {
+                    <partial name="_Avatar" model='new AvatarViewModel("group-" + header.Id, header.Title, null, "md")' />
+                }
+                <div class="flex-grow-1" style="min-width: 0">
+                    <div class="chat-header-title text-truncate">
+                        @header.Title
+                        @if (header.Other?.IsDemoBot == true) { <span class="badge text-bg-secondary bot-badge">bot</span> }
+                    </div>
+                    <div class="chat-header-sub">
+                        @if (isGroup)
+                        {
+                            @($"{header.MemberCount} membros")
+                        }
+                        else if (header.Other?.IsDemoBot == true)
+                        {
+                            @("respostas automáticas de demonstração")
+                        }
+                        else if (header.Other is not null)
+                        {
+                            <span data-presence-text="@header.Other.Id">@(header.Online ? "online" : Display.LastSeen(header.Other.LastSeenAt, now))</span>
+                        }
+                    </div>
+                </div>
+                @if (isGroup)
+                {
+                    <a class="btn btn-sm btn-outline-secondary" href="/c/@header.Id/detalhes">Detalhes</a>
+                }
+            </header>
+
+            <div class="message-scroller" id="message-scroller" tabindex="0" aria-label="Mensagens">
+                <div class="load-older @(messages.HasMore ? "" : "d-none")" id="load-older">
+                    <a class="btn btn-sm btn-outline-secondary" href="/c/@header.Id?before=@messages.Messages.FirstOrDefault()?.Id">Carregar mensagens anteriores</a>
+                </div>
+                <div class="empty-state my-5 @(messages.Messages.Count == 0 ? "" : "d-none")" id="no-messages">
+                    <div class="empty-icon" aria-hidden="true">✉️</div>
+                    <p>Nenhuma mensagem ainda. Diga oi!</p>
+                </div>
+                <ol class="message-list" id="message-list">
+                    <partial name="_Messages" model="new MessageListModel(messages.Messages, me, now)" />
+                </ol>
+            </div>
+
+            <button type="button" class="btn btn-accent btn-sm new-messages-pill d-none" id="new-messages-pill">novas mensagens ↓</button>
+
+            <form id="composer" class="composer" method="post" action="/c/@header.Id/messages" asp-antiforgery="true">
+                @if (TempData["SendError"] is string sendError)
+                {
+                    <div class="alert alert-danger py-1 small" role="alert">@sendError</div>
+                }
+                <input type="hidden" name="clientMessageId" value="@Model.NewClientMessageId" />
+                <div class="composer-row">
+                    <label for="composer-input" class="visually-hidden">Mensagem</label>
+                    <textarea id="composer-input" name="body" class="form-control" rows="1" maxlength="2000"
+                              placeholder="Escreva uma mensagem" autocomplete="off" required></textarea>
+                    <button class="btn btn-accent" type="submit">Enviar</button>
+                </div>
+                <div class="composer-hint">
+                    <span>Enter envia · Shift+Enter quebra a linha</span>
+                    <span id="char-counter" aria-live="polite">0/2000</span>
+                </div>
+            </form>
+        </section>
+
+        @* Cloned by chat.js for messages that arrive in real time. Same structure as _Messages. *@
+        <template id="message-template">
+            <li class="msg">
+                <span class="avatar avatar-sm" aria-hidden="true"></span>
+                <div class="msg-bubble">
+                    <div class="msg-sender"></div>
+                    <div class="msg-body"></div>
+                    <span class="msg-status"></span>
+                </div>
+                <time class="msg-time"></time>
+            </li>
+        </template>
+    }
+</div>

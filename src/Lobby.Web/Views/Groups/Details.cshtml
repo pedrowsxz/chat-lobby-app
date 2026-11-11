@@ -1,0 +1,54 @@
+@model GroupDetailsViewModel
+@inject TimeProvider Time
+@{
+    ViewData["Title"] = Model.Name;
+    var now = Time.GetUtcNow();
+}
+<div class="page-narrow">
+    <a href="/c/@Model.Id" class="small">← Voltar para a conversa</a>
+    <h1 class="h3 mt-2 mb-4">@Model.Name</h1>
+    @if (Model.Error is not null)
+    {
+        <div class="alert alert-danger py-2" role="alert">@Model.Error</div>
+    }
+
+    <section class="mb-4" aria-labelledby="membersTitle">
+        <h2 id="membersTitle" class="h6">@Model.Members.Count membros</h2>
+        <ul class="person-list card">
+            @foreach (var member in Model.Members)
+            {
+                <li class="person">
+                    <partial name="_Avatar" model='new AvatarViewModel(member.Id, member.DisplayName, member.AvatarFileName, "md", member.IsDemoBot ? null : member.Online)' />
+                    <div class="flex-grow-1" style="min-width: 0">
+                        <div class="person-name">@member.DisplayName</div>
+                        <div class="person-meta">
+                            @("@" + member.UserName) ·
+                            <span data-presence-text="@member.Id">@(member.Online ? "online" : Display.LastSeen(member.LastSeenAt, now))</span>
+                        </div>
+                        @if (member.StatusMessage is not null)
+                        {
+                            <div class="person-meta">@member.StatusMessage</div>
+                        }
+                    </div>
+                </li>
+            }
+        </ul>
+    </section>
+
+    <section class="mb-4" aria-labelledby="addTitle">
+        <h2 id="addTitle" class="h6">Adicionar pessoas</h2>
+        <p class="form-text mt-0">Quem entra vê todo o histórico do grupo.</p>
+        <form method="post" action="/c/@Model.Id/membros" asp-antiforgery="true">
+            <partial name="_PeoplePicker" model="(Model.Candidates, new List<string>())" />
+            @if (Model.Candidates.Count > 0)
+            {
+                <button type="submit" class="btn btn-accent mt-3">Adicionar</button>
+            }
+        </form>
+    </section>
+
+    <form method="post" action="/c/@Model.Id/sair" asp-antiforgery="true"
+          onsubmit="return confirm('Sair do grupo? Se você for a última pessoa, o grupo será apagado.');">
+        <button type="submit" class="btn btn-outline-danger">Sair do grupo</button>
+    </form>
+</div>

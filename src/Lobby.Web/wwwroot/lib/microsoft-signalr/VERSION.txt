@@ -1,0 +1,1 @@
+@microsoft/signalr 10.0.11 (dist/browser/signalr.min.js), downloaded from https://cdn.jsdelivr.net/npm/@microsoft/signalr@10.0.11/. Vendored on purpose: no npm or bundler in this project.

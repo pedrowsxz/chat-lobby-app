@@ -1,0 +1,8 @@
+# Caddy gets and renews the HTTPS certificate for the domain by itself.
+# reverse_proxy passes WebSocket upgrades through with no extra config, and adds
+# X-Forwarded-For / X-Forwarded-Proto, which the app reads (App__BehindProxy=true).
+{$LOBBY_DOMAIN} {
+	encode zstd gzip
+	header Strict-Transport-Security "max-age=31536000"
+	reverse_proxy web:8080
+}

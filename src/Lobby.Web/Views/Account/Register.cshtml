@@ -1,0 +1,41 @@
+@model RegisterViewModel
+@{ ViewData["Title"] = "Criar conta"; }
+<div class="auth-wrap">
+    <section class="auth-card card shadow-sm">
+        <div class="card-body p-4 p-md-5">
+            <h1 class="h3 mb-4">Criar conta</h1>
+            <form method="post" asp-antiforgery="true" action="/conta/criar" novalidate>
+                <div asp-validation-summary="ModelOnly" class="text-danger small mb-2" role="alert"></div>
+                <div class="mb-3">
+                    <label asp-for="UserName" class="form-label"></label>
+                    <input asp-for="UserName" class="form-control" autocomplete="username" aria-describedby="userNameHelp" />
+                    <div id="userNameHelp" class="form-text">Minúsculas, números, ponto, hífen ou sublinhado.</div>
+                    <span asp-validation-for="UserName" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="DisplayName" class="form-label"></label>
+                    <input asp-for="DisplayName" class="form-control" autocomplete="name" />
+                    <span asp-validation-for="DisplayName" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" autocomplete="email" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password" class="form-control" autocomplete="new-password" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+                <div class="mb-4">
+                    <label asp-for="ConfirmPassword" class="form-label"></label>
+                    <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                </div>
+                <button type="submit" class="btn btn-accent w-100">Criar conta</button>
+            </form>
+            <p class="text-center small mt-4 mb-0">Já tem conta? <a href="/conta/entrar">Entrar</a></p>
+        </div>
+    </section>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

@@ -1,0 +1,11 @@
+@model string
+<div class="card pair-card">
+    <div class="card-body p-3">
+        <h2 class="h6 mb-1">Veja o tempo real</h2>
+        <p class="small mb-2">Para ver o tempo real, abra este link em outra janela anônima ou em outro navegador:</p>
+        <div class="input-group input-group-sm">
+            <input class="form-control pair-link" id="pair-link" value="@Model" readonly aria-label="Link de par" />
+            <button class="btn btn-accent" type="button" data-copy="#pair-link">Copiar</button>
+        </div>
+    </div>
+</div>

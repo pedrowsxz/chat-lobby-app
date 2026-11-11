@@ -1,0 +1,92 @@
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@{
+    var signedIn = User.Identity?.IsAuthenticated == true;
+    var fullHeight = ViewData["FullHeight"] as bool? == true;
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] is string t ? t + " · Lobby" : "Lobby")</title>
+    <script>
+        // Follow the OS colour scheme (Bootstrap 5.3 colour modes). Runs before paint to avoid a flash.
+        (function () {
+            const media = matchMedia('(prefers-color-scheme: dark)');
+            const apply = () => document.documentElement.setAttribute('data-bs-theme', media.matches ? 'dark' : 'light');
+            apply();
+            media.addEventListener('change', apply);
+        })();
+    </script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @if (signedIn)
+    {
+        <meta name="csrf-token" content="@Antiforgery.GetAndStoreTokens(Context).RequestToken" />
+        <meta name="current-user" content="@User.GetUserId()" />
+    }
+</head>
+<body class="@(fullHeight ? "layout-full" : "")">
+    <a class="visually-hidden-focusable skip-link" href="#main">Pular para o conteúdo</a>
+    <header class="app-header">
+        <nav class="navbar navbar-expand-md">
+            <div class="container-fluid">
+                <a class="navbar-brand brand" href="/"><span class="brand-mark" aria-hidden="true">L</span> Lobby</a>
+                @if (signedIn)
+                {
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                            aria-controls="mainNav" aria-expanded="false" aria-label="Abrir menu">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="mainNav">
+                        <ul class="navbar-nav me-auto">
+                            <li class="nav-item"><a class="nav-link" href="/">Conversas</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/pessoas">Pessoas</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/grupos/novo">Novo grupo</a></li>
+                        </ul>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="dropdown">
+                                <button class="btn btn-link nav-user dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <partial name="_Avatar" model='new AvatarViewModel(User.GetUserId(), User.GetDisplayName(), User.GetAvatar(), "sm")' />
+                                    <span class="ms-1">@User.GetDisplayName()</span>
+                                    @if (User.IsGuest()) { <span class="badge rounded-pill text-bg-secondary ms-1">visitante</span> }
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="/perfil">Editar perfil</a></li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li>
+                                        <form method="post" asp-antiforgery="true" action="/conta/sair">
+                                            <button class="dropdown-item" type="submit">Sair</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </nav>
+    </header>
+
+    @if (signedIn)
+    {
+        <div id="connection-banner" class="connection-banner d-none" role="status" aria-live="polite">reconectando…</div>
+    }
+    <main id="main" class="@(fullHeight ? "main-full" : "container py-4")">
+        @RenderBody()
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @if (signedIn)
+    {
+        <script>
+            // One place for CSRF on AJAX: every jQuery request sends the antiforgery token as a header.
+            $.ajaxSetup({ headers: { 'RequestVerificationToken': $('meta[name="csrf-token"]').attr('content') } });
+        </script>
+        <script src="~/lib/microsoft-signalr/signalr.min.js"></script>
+        <script src="~/js/chat.js" asp-append-version="true"></script>
+    }
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

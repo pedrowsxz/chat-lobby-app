@@ -1,0 +1,68 @@
+@model ProfileViewModel
+@{ ViewData["Title"] = "Editar perfil"; }
+<div class="page-narrow">
+    <h1 class="h3 mb-4">Editar perfil</h1>
+    @if (TempData["Flash"] is string flash)
+    {
+        <div class="alert alert-success" role="status">@flash</div>
+    }
+
+    <section class="card mb-4" aria-labelledby="photoTitle">
+        <div class="card-body d-flex flex-column flex-sm-row align-items-sm-center gap-4">
+            <partial name="_Avatar" model='new AvatarViewModel(Model.UserId, Model.DisplayName, Model.AvatarFileName, "lg")' />
+            <div class="flex-grow-1">
+                <h2 id="photoTitle" class="h6">Foto</h2>
+                @if (TempData["AvatarError"] is string avatarError)
+                {
+                    <div class="alert alert-danger py-2" role="alert">@avatarError</div>
+                }
+                <form method="post" asp-antiforgery="true" action="/perfil/avatar" enctype="multipart/form-data" class="d-flex flex-wrap gap-2">
+                    <label for="avatar" class="visually-hidden">Escolher imagem</label>
+                    <input id="avatar" name="avatar" type="file" class="form-control" accept="image/jpeg,image/png,image/webp" required />
+                    <button type="submit" class="btn btn-accent">Enviar foto</button>
+                </form>
+                <div class="form-text">JPEG, PNG ou WebP, até 2 MB.</div>
+                @if (Model.AvatarFileName is not null)
+                {
+                    <form method="post" asp-antiforgery="true" action="/perfil/avatar/remover" class="mt-2">
+                        <button type="submit" class="btn btn-link btn-sm p-0 text-danger">Remover foto</button>
+                    </form>
+                }
+            </div>
+        </div>
+    </section>
+
+    <section class="card mb-4" aria-labelledby="infoTitle">
+        <div class="card-body">
+            <h2 id="infoTitle" class="h6 mb-3">Informações</h2>
+            <form method="post" asp-antiforgery="true" action="/perfil" novalidate>
+                <div asp-validation-summary="ModelOnly" class="text-danger small mb-2" role="alert"></div>
+                <div class="mb-3">
+                    <label class="form-label" for="handle">Nome de usuário</label>
+                    <input id="handle" class="form-control" value="@("@" + Model.UserName)" disabled />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="DisplayName" class="form-label"></label>
+                    <input asp-for="DisplayName" class="form-control" maxlength="40" />
+                    <span asp-validation-for="DisplayName" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="StatusMessage" class="form-label"></label>
+                    <input asp-for="StatusMessage" class="form-control" maxlength="80" placeholder="O que você está fazendo?" />
+                    <span asp-validation-for="StatusMessage" class="text-danger small"></span>
+                </div>
+                <button type="submit" class="btn btn-accent">Salvar</button>
+            </form>
+        </div>
+    </section>
+
+    @if (!Model.IsGuest)
+    {
+        <a href="/perfil/senha" class="btn btn-outline-secondary">Alterar senha</a>
+    }
+    else
+    {
+        <p class="text-body-secondary small">Visitantes não têm senha: a conta existe só nesta sessão e é apagada em 24 horas.</p>
+    }
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

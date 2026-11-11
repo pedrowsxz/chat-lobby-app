@@ -1,0 +1,25 @@
+@model MessageListModel
+@{
+    string? previousDay = null;
+    string? previousSender = null;
+}
+@foreach (var m in Model.Messages)
+{
+    var day = Display.DayKey(m.SentAt);
+    if (day != previousDay)
+    {
+        <li class="day-sep" data-day="@day">@Display.DayLabel(m.SentAt, Model.Now)</li>
+    }
+    var first = day != previousDay || m.SenderId != previousSender;
+    var mine = m.SenderId == Model.CurrentUserId;
+    <li class="msg@(mine ? " mine" : "")@(first ? " first" : "")" data-id="@m.Id" data-cmid="@m.ClientMessageId" data-sender="@m.SenderId" data-day="@day" style="--hue: @m.SenderHue">
+        <partial name="_Avatar" model='new AvatarViewModel(m.SenderId, m.SenderDisplayName, m.SenderAvatarFileName, "sm")' />
+        <div class="msg-bubble">
+            <div class="msg-sender">@m.SenderDisplayName</div>
+            <div class="msg-body">@m.Body</div>
+        </div>
+        <time class="msg-time" datetime="@m.SentAt.ToString("o")" title="@Display.FullDateTime(m.SentAt)">@Display.Time(m.SentAt)</time>
+    </li>
+    previousDay = day;
+    previousSender = m.SenderId;
+}

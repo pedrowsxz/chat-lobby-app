@@ -1,0 +1,28 @@
+@model (List<PersonViewModel> Candidates, List<string> Selected)
+<fieldset>
+    <legend class="form-label fs-6">Pessoas</legend>
+    @if (Model.Candidates.Count == 0)
+    {
+        <p class="text-body-secondary small">Não há mais ninguém para adicionar.</p>
+    }
+    else
+    {
+        <ul class="person-list picker card">
+            @foreach (var person in Model.Candidates)
+            {
+                var inputId = "member-" + person.Id;
+                <li class="person py-2">
+                    <input class="form-check-input mt-0" type="checkbox" name="memberIds" value="@person.Id" id="@inputId"
+                           checked="@Model.Selected.Contains(person.Id)" />
+                    <label class="d-flex align-items-center gap-2 flex-grow-1" for="@inputId">
+                        <partial name="_Avatar" model='new AvatarViewModel(person.Id, person.DisplayName, person.AvatarFileName, "sm")' />
+                        <span>
+                            <span class="person-name">@person.DisplayName</span>
+                            <span class="person-meta">@("@" + person.UserName)</span>
+                        </span>
+                    </label>
+                </li>
+            }
+        </ul>
+    }
+</fieldset>

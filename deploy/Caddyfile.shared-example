@@ -1,0 +1,10 @@
+# Add a block like this to the Caddyfile of the shared Caddy (one subdomain per app).
+lobby.example.com {
+	encode zstd gzip
+	header Strict-Transport-Security "max-age=31536000"
+	reverse_proxy lobby-web:8080
+}
+
+# other-app.example.com {
+# 	reverse_proxy other-app-web:8080
+# }

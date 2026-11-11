@@ -1,0 +1,26 @@
+# Production, shared VPS (option B in docs/DEPLOY.md): only the app. It joins an existing
+# Docker network where one SQL Server and one Caddy already serve several apps.
+#   docker compose -f deploy/compose.shared.yaml --env-file .env up -d --build
+services:
+  lobby-web:
+    build: ..
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      # A database of its own on the shared server (see DEPLOY.md: create a login for it; migrations create the tables).
+      ConnectionStrings__Default: ${LOBBY_CONNECTION_STRING:?Set LOBBY_CONNECTION_STRING in .env}
+      App__BehindProxy: "true"
+      App__AllowRegistration: ${ALLOW_REGISTRATION:-true}
+      Demo__SimulateReplies: ${DEMO_SIMULATE_REPLIES:-true}
+    volumes:
+      - lobby_appdata:/data
+    networks:
+      - shared
+
+networks:
+  shared:
+    external: true
+    name: ${SHARED_NETWORK:-web}
+
+volumes:
+  lobby_appdata:

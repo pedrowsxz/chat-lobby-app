@@ -1,0 +1,15 @@
+@model SidebarModel
+@if (Model.Conversations.Count == 0)
+{
+    <div class="empty-state p-4" id="conversation-empty">
+        <div class="empty-icon" aria-hidden="true">💬</div>
+        <p class="mb-2">Você ainda não tem conversas.</p>
+        <a href="/pessoas" class="btn btn-sm btn-accent">Encontrar pessoas</a>
+    </div>
+}
+<ul class="conversation-list" id="conversation-list">
+    @foreach (var item in Model.Conversations)
+    {
+        <partial name="_ConversationItem" model="(item, item.Id == Model.ActiveConversationId, Model.Now)" />
+    }
+</ul>

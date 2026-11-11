@@ -1,0 +1,45 @@
+@model LoginViewModel
+@{ ViewData["Title"] = "Entrar"; }
+<div class="auth-wrap">
+    <section class="auth-card card shadow-sm">
+        <div class="card-body p-4 p-md-5">
+            <h1 class="h3 mb-1">Bem-vindo ao Lobby</h1>
+            <p class="text-body-secondary mb-4">Bate-papo em tempo real com ASP.NET Core e SignalR.</p>
+
+            <form method="post" asp-antiforgery="true" action="/conta/convidado" class="mb-4">
+                <button type="submit" class="btn btn-accent btn-lg w-100">Entrar como convidado</button>
+                <p class="small text-body-secondary mt-2 mb-0">
+                    Sem cadastro. Sua conta de visitante e tudo que você criar são apagados depois de 24 horas.
+                </p>
+            </form>
+
+            <div class="divider-text"><span>ou entre com sua conta</span></div>
+
+            <form method="post" asp-antiforgery="true" action="/conta/entrar" novalidate>
+                <div asp-validation-summary="ModelOnly" class="text-danger small mb-2" role="alert"></div>
+                <input type="hidden" asp-for="ReturnUrl" />
+                <div class="mb-3">
+                    <label asp-for="Login" class="form-label"></label>
+                    <input asp-for="Login" class="form-control" autocomplete="username" />
+                    <span asp-validation-for="Login" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password" class="form-control" autocomplete="current-password" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+                <div class="form-check mb-3">
+                    <input asp-for="RememberMe" class="form-check-input" />
+                    <label asp-for="RememberMe" class="form-check-label"></label>
+                </div>
+                <button type="submit" class="btn btn-outline-secondary w-100">Entrar</button>
+            </form>
+
+            @if (ViewBag.AllowRegistration == true)
+            {
+                <p class="text-center small mt-4 mb-0">Ainda não tem conta? <a href="/conta/criar">Criar conta</a></p>
+            }
+        </div>
+    </section>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }
